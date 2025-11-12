@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Trophy,
   TrendingUp,
@@ -451,7 +451,7 @@ export default function RankingPage() {
     <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold mb-2 bg-linear-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
           랭킹
         </h1>
         <p className="text-muted-foreground text-lg">
@@ -474,8 +474,13 @@ export default function RankingPage() {
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">기간 선택</label>
-                <Tabs value={period} onValueChange={(value) => setPeriod(value as Period)}>
+                <label className="text-sm font-medium mb-2 block">
+                  기간 선택
+                </label>
+                <Tabs
+                  value={period}
+                  onValueChange={(value) => setPeriod(value as Period)}
+                >
                   <TabsList className="w-full">
                     <TabsTrigger value="weekly" className="flex-1">
                       주간
@@ -560,7 +565,10 @@ export default function RankingPage() {
                         {character.rank}위
                       </Badge>
                       {character.rank <= 3 && (
-                        <Badge variant="outline" className="flex items-center gap-1">
+                        <Badge
+                          variant="outline"
+                          className="flex items-center gap-1"
+                        >
                           <Flame className="w-3 h-3" />
                           인기
                         </Badge>
@@ -749,4 +757,3 @@ export default function RankingPage() {
     </main>
   );
 }
-

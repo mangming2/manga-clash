@@ -119,4 +119,20 @@
   body {
     @apply bg-background text-foreground;
   }
+  html {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+/* Override wallet adapter styles that might block scrolling */
+body {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  position: relative !important;
+}
+
+html {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
