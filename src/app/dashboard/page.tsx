@@ -1,39 +1,14 @@
-"use client";
-
-import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Clock,
-  TrendingUp,
-  Trophy,
-  Users,
-  Flame,
-  ArrowRight,
-  ExternalLink,
-} from "lucide-react";
+import { Trophy, ExternalLink } from "lucide-react";
+import { DashboardBattles } from "@/components/DashboardBattles";
 
 // Mock data types
 type BattleStatus = "ongoing" | "ending_soon" | "popular";
-type SortOption = "popular" | "ending_soon" | "character";
 
-interface Battle {
+export interface Battle {
   id: number;
   character1: string;
   character2: string;
@@ -224,47 +199,6 @@ const mockResults: BattleResult[] = [
 ];
 
 export default function DashboardPage() {
-  const [sortBy, setSortBy] = useState<SortOption>("popular");
-  const [characterFilter, setCharacterFilter] = useState<string>("all");
-
-  // Get unique character names for filter
-  const allCharacters = useMemo(() => {
-    const characters = new Set<string>();
-    mockBattles.forEach((battle) => {
-      characters.add(battle.character1);
-      characters.add(battle.character2);
-    });
-    return Array.from(characters).sort();
-  }, []);
-
-  // Filter and sort battles
-  const filteredAndSortedBattles = useMemo(() => {
-    let filtered = [...mockBattles];
-
-    // Filter by character
-    if (characterFilter !== "all") {
-      filtered = filtered.filter(
-        (battle) =>
-          battle.character1 === characterFilter ||
-          battle.character2 === characterFilter
-      );
-    }
-
-    // Sort battles
-    switch (sortBy) {
-      case "popular":
-        return filtered.sort((a, b) => b.totalVotes - a.totalVotes);
-      case "ending_soon":
-        return filtered.sort((a, b) => a.endTimeMinutes - b.endTimeMinutes);
-      case "character":
-        return filtered.sort((a, b) =>
-          a.character1.localeCompare(b.character1, "ko")
-        );
-      default:
-        return filtered;
-    }
-  }, [sortBy, characterFilter]);
-
   return (
     <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Page Header */}
@@ -277,190 +211,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Filter and Sort Section */}
-      <section className="mb-8">
-        <Card className="border-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-orange-500" />
-              배틀 필터 및 정렬
-            </CardTitle>
-            <CardDescription>
-              원하는 방식으로 배틀을 정렬하고 필터링하세요
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">
-                  정렬 기준
-                </label>
-                <Select
-                  value={sortBy}
-                  onValueChange={(value) => setSortBy(value as SortOption)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="정렬 기준 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="popular">
-                      <div className="flex items-center gap-2">
-                        <Flame className="w-4 h-4" />
-                        인기순
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="ending_soon">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
-                        마감 임박순
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="character">
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        캐릭터별
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">
-                  캐릭터 필터
-                </label>
-                <Select
-                  value={characterFilter}
-                  onValueChange={setCharacterFilter}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="캐릭터 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">전체</SelectItem>
-                    {allCharacters.map((character) => (
-                      <SelectItem key={character} value={character}>
-                        {character}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Ongoing Battles Section */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-3xl font-bold mb-2 flex items-center gap-2">
-              <Flame className="w-6 h-6 text-orange-500" />
-              현재 배팅 받고 있는 배틀
-            </h2>
-            <p className="text-muted-foreground">
-              {filteredAndSortedBattles.length}개의 배틀이 진행 중입니다
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAndSortedBattles.map((battle) => {
-            const isPopular = battle.status === "popular";
-            const isEndingSoon = battle.status === "ending_soon";
-            const isHighlighted = isPopular || isEndingSoon;
-
-            return (
-              <Link key={battle.id} href={`/battle/${battle.id}`}>
-                <Card
-                  className={`hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer border-2 ${
-                    isHighlighted
-                      ? isPopular
-                        ? "border-orange-400 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20"
-                        : "border-red-400 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20"
-                      : "hover:border-orange-300 dark:hover:border-orange-700"
-                  }`}
-                >
-                  <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge
-                        variant={isEndingSoon ? "destructive" : "secondary"}
-                        className="flex items-center gap-1"
-                      >
-                        <Clock className="w-3 h-3" />
-                        {battle.endTime}
-                      </Badge>
-                      {isPopular && (
-                        <Badge
-                          variant="default"
-                          className="bg-orange-500 hover:bg-orange-600 flex items-center gap-1"
-                        >
-                          <Flame className="w-3 h-3" />
-                          인기
-                        </Badge>
-                      )}
-                      {isEndingSoon && (
-                        <Badge
-                          variant="destructive"
-                          className="flex items-center gap-1 animate-pulse"
-                        >
-                          <Clock className="w-3 h-3" />
-                          마감 임박
-                        </Badge>
-                      )}
-                    </div>
-                    <CardTitle className="text-xl mb-4 text-center">
-                      VS
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-orange-50 to-orange-100 dark:from-zinc-800 dark:to-zinc-700">
-                        <div className="flex items-center gap-3 flex-1">
-                          <div className="text-4xl">{battle.thumbnail1}</div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold truncate">
-                              {battle.character1}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {battle.votes1.toLocaleString("ko-KR")}표
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-center text-2xl font-bold text-muted-foreground">
-                        VS
-                      </div>
-                      <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 dark:from-zinc-800 dark:to-zinc-700">
-                        <div className="flex items-center gap-3 flex-1">
-                          <div className="text-4xl">{battle.thumbnail2}</div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold truncate">
-                              {battle.character2}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {battle.votes2.toLocaleString("ko-KR")}표
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="pt-2 text-xs text-muted-foreground border-t text-center">
-                        총 투표수: {battle.totalVotes.toLocaleString("ko-KR")}표
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button className="w-full" variant="outline">
-                      투표하기
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+      <DashboardBattles battles={mockBattles} />
 
       {/* Recent Results Section */}
       <section className="mb-8">
